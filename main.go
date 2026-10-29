@@ -227,7 +227,7 @@ func processQueue(
 			elapsed := time.Since(aiClient.lastRequest)
 			if elapsed < rateLimitInterval {
 				wait := rateLimitInterval - elapsed
-				log.Printf("Rate-Limit Queue: warte %v vor Antwort auf %s...", wait.Round(time.Second), m.Author.Username)
+				log.Printf("Rate-Limit Queue: waiting %v before responding to %s...", wait.Round(time.Second), m.Author.Username)
 				time.Sleep(wait)
 			}
 		}
@@ -254,13 +254,13 @@ func handleQueuedMessage(
 	// Send request to Pollinations API (with 1 automatic retry if HTTP 429 occurs)
 	respText, err := aiClient.generateReply(ctx, history)
 	if err != nil && strings.Contains(err.Error(), "HTTP 429") {
-		log.Printf("Pollinations 429 erhalten, warte %v und versuche erneut...", rateLimitInterval)
+		log.Printf("Pollinations 429 received, waiting %v and trying again...", rateLimitInterval)
 		time.Sleep(rateLimitInterval)
 		_ = s.ChannelTyping(m.ChannelID)
 		respText, err = aiClient.generateReply(ctx, history)
 	}
 	if err != nil {
-		log.Printf("Pollinations-Fehler: %v", err)
+		log.Printf("Pollinations error: %v", err)
 		_, _ = s.ChannelMessageSendReply(m.ChannelID, "kein plan", m.Reference())
 		return
 	}
